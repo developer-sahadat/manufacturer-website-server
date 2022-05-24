@@ -47,7 +47,6 @@ async function run() {
     app.put("/user/:email", async (req, res) => {
       const email = req.params.email;
       const user = req.body;
-
       const filter = { email: email };
       const options = { upsert: true };
       const updateDoc = {
@@ -62,6 +61,38 @@ async function run() {
     app.get("/user", verifyJWT, async (req, res) => {
       const user = await userCollection.find({}).toArray();
       res.send(user);
+    });
+    /**User get findOne api code start**/
+    app.get("/single-user", verifyJWT, async (req, res) => {
+      const email = req.query.email;
+      const user = await userCollection.findOne({ email: email });
+      res.send(user);
+    });
+
+    /**Make  user a Admin put api code start**/
+    app.put("/user/admin/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const requestor = req.decoded.email;
+      const requestorInfo = await userCollection.findOne({ email: requestor });
+
+      if (requestorInfo?.role === "admin") {
+        const filter = { email: email };
+        const updateDoc = {
+          $set: { role: "admin" },
+        };
+        const result = await userCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      } else {
+        return res.status(403).send({ message: "Forbidden Access" });
+      }
+    });
+
+    /** Admin get api code start**/
+    app.get("/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const admin = await userCollection.findOne({ email: email });
+      const isAdmin = admin.role === "admin";
+      res.send({ admin: isAdmin });
     });
 
     /**all  services get find api code start**/
