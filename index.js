@@ -1,5 +1,6 @@
 const express = require("express");
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 const app = express();
@@ -24,9 +25,23 @@ async function run() {
       .db("construction_tools")
       .collection("services");
     const orderCollection = client.db("construction_tools").collection("order");
+    const userCollection = client.db("construction_tools").collection("user");
+
+    /**User  put update api code start**/
+    app.put("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      var token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN);
+      res.send({ result, token });
+    });
 
     /**all  services get find api code start**/
-
     app.get("/services", async (req, res) => {
       const services = await servicesCollection.find({}).toArray();
       res.send(services);
