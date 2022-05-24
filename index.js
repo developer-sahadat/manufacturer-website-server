@@ -23,19 +23,36 @@ async function run() {
     const servicesCollection = client
       .db("construction_tools")
       .collection("services");
+    const orderCollection = client.db("construction_tools").collection("order");
 
-    /**all services find api code start**/
+    /**all  services get find api code start**/
 
     app.get("/services", async (req, res) => {
       const services = await servicesCollection.find({}).toArray();
       res.send(services);
     });
 
-    /**services findOne api code start**/
+    /**services get findOne api code start**/
     app.get("/services/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const service = await servicesCollection.findOne(query);
+      res.send(service);
+    });
+
+    /**order  post insert api code start**/
+    app.post("/order", async (req, res) => {
+      const order = req.body;
+      const doc = order;
+      const result = await orderCollection.insertOne(doc);
+      res.send(result);
+    });
+
+    /**My order  get find api code start**/
+    app.get("/my-items", async (req, res) => {
+      const email = req?.query?.email;
+      const query = { email };
+      const service = await orderCollection.find(query).toArray();
       res.send(service);
     });
   } finally {
