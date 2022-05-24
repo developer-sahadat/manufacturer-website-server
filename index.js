@@ -95,6 +95,20 @@ async function run() {
       res.send({ admin: isAdmin });
     });
 
+    /** profile update  api code start**/
+    app.put("/profile/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+      console.log(result);
+      res.send(result);
+    });
+
     /**all  services get find api code start**/
     app.get("/services", async (req, res) => {
       const services = await servicesCollection.find({}).toArray();
