@@ -15,8 +15,24 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
-/*****Express js mongodb crud operations start code*****/
+/*****Verify Web Token start code*****/
+function verifyJWT(req, res, next) {
+  const authHeaderToken = req.headers.authorization;
+  if (!authHeaderToken) {
+    return res.status(401).send({ message: "UnAuthorization Access" });
+  }
+  const token = authHeaderToken.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+    if (err) {
+      return res.status(403).send({ message: "Forbidden Access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
+/*****Verify Web Token ends code*****/
 
+/*****Express js mongodb crud operations start code*****/
 async function run() {
   try {
     await client.connect();
@@ -31,6 +47,7 @@ async function run() {
     app.put("/user/:email", async (req, res) => {
       const email = req.params.email;
       const user = req.body;
+
       const filter = { email: email };
       const options = { upsert: true };
       const updateDoc = {
@@ -39,6 +56,12 @@ async function run() {
       const result = await userCollection.updateOne(filter, updateDoc, options);
       var token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN);
       res.send({ result, token });
+    });
+
+    /**User get find api code start**/
+    app.get("/user", verifyJWT, async (req, res) => {
+      const user = await userCollection.find({}).toArray();
+      res.send(user);
     });
 
     /**all  services get find api code start**/
@@ -64,11 +87,16 @@ async function run() {
     });
 
     /**My order  get find api code start**/
-    app.get("/my-order", async (req, res) => {
+    app.get("/my-order", verifyJWT, async (req, res) => {
       const email = req?.query?.email;
-      const query = { email };
-      const service = await orderCollection.find(query).toArray();
-      res.send(service);
+      const decodedEmail = req.decoded.email;
+      if (decodedEmail === email) {
+        const query = { email };
+        const service = await orderCollection.find(query).toArray();
+        res.send(service);
+      } else {
+        return res.status(403).send({ message: "Forbidden Access" });
+      }
     });
     /**My order  Delete  api code start**/
     app.delete("/my-order/:id", async (req, res) => {
