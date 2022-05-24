@@ -49,11 +49,18 @@ async function run() {
     });
 
     /**My order  get find api code start**/
-    app.get("/my-items", async (req, res) => {
+    app.get("/my-order", async (req, res) => {
       const email = req?.query?.email;
       const query = { email };
       const service = await orderCollection.find(query).toArray();
       res.send(service);
+    });
+    /**My order  Delete  api code start**/
+    app.delete("/my-order/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await orderCollection.deleteOne(query);
+      res.send(result);
     });
   } finally {
   }
