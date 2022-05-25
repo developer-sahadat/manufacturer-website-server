@@ -3,6 +3,8 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 const app = express();
 const port = process.env.PORT || 5000;
 app.use(cors());
@@ -161,10 +163,28 @@ async function run() {
     });
 
     /**my order payment page id filter get findOne api**/
-    app.get("/my-order/:id", async (req, res) => {
+    app.get("/my-order/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
+      const payment = req.body;
       const query = { _id: ObjectId(id) };
       const result = await orderCollection.findOne(query);
+      res.send(result);
+    });
+
+    /**my order payment page id filter get findOne api**/
+    app.put("/my-order/:id", async (req, res) => {
+      const id = req.params.id;
+      const payment = req.body;
+      const filter = { _id: ObjectId(id) };
+
+      const updateDoc = {
+        $set: {
+          paid: true,
+          transaction: payment.transaction,
+        },
+      };
+      const result = await orderCollection.updateOne(filter, updateDoc);
+
       res.send(result);
     });
 
@@ -174,6 +194,20 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const result = await orderCollection.deleteOne(query);
       res.send(result);
+    });
+
+    /**Create a PaymentIntent with the order amount and currency API**/
+    app.post("/create-payment-intent", async (req, res) => {
+      const { price } = req.body;
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
     });
   } finally {
   }
