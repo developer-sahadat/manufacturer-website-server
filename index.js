@@ -131,6 +131,14 @@ async function run() {
       res.send(result);
     });
 
+    /**services get findOne api code start**/
+    app.delete("/services/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await servicesCollection.deleteOne(query);
+      res.send(result);
+    });
+
     /**order  post insert api code start**/
     app.post("/order", async (req, res) => {
       const order = req.body;
