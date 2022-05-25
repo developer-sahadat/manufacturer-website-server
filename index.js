@@ -159,6 +159,15 @@ async function run() {
         return res.status(403).send({ message: "Forbidden Access" });
       }
     });
+
+    /**my order payment page id filter get findOne api**/
+    app.get("/my-order/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await orderCollection.findOne(query);
+      res.send(result);
+    });
+
     /**My order  Delete  api code start**/
     app.delete("/my-order/:id", async (req, res) => {
       const id = req.params.id;
