@@ -105,7 +105,7 @@ async function run() {
         $set: user,
       };
       const result = await userCollection.updateOne(filter, updateDoc);
-      console.log(result);
+
       res.send(result);
     });
 
@@ -121,6 +121,14 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const service = await servicesCollection.findOne(query);
       res.send(service);
+    });
+
+    /**all  services get find api code start**/
+    app.post("/services", async (req, res) => {
+      const service = req.body;
+      const doc = service;
+      const result = await servicesCollection.insertOne(doc);
+      res.send(result);
     });
 
     /**order  post insert api code start**/
