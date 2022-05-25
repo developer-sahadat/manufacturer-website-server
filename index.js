@@ -196,7 +196,7 @@ async function run() {
       res.send(result);
     });
 
-    /**Create a PaymentIntent with the order amount and currency API**/
+    /**Create a PaymentIntent with the order amount API**/
     app.post("/create-payment-intent", async (req, res) => {
       const { price } = req.body;
       const amount = price * 100;
