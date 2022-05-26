@@ -44,6 +44,9 @@ async function run() {
       .collection("services");
     const orderCollection = client.db("construction_tools").collection("order");
     const userCollection = client.db("construction_tools").collection("user");
+    const reviewCollection = client
+      .db("construction_tools")
+      .collection("review");
 
     /**User  put update api code start**/
     app.put("/user/:email", async (req, res) => {
@@ -165,7 +168,6 @@ async function run() {
     /**my order payment page id filter get findOne api**/
     app.get("/my-order/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
-      const payment = req.body;
       const query = { _id: ObjectId(id) };
       const result = await orderCollection.findOne(query);
       res.send(result);
@@ -196,6 +198,12 @@ async function run() {
       res.send(result);
     });
 
+    /**My order  all get  api code start**/
+    app.get("/order", verifyJWT, async (req, res) => {
+      const review = await orderCollection.find({}).toArray();
+      res.send(review);
+    });
+
     /**Create a PaymentIntent with the order amount API**/
     app.post("/create-payment-intent", async (req, res) => {
       const { price } = req.body;
@@ -208,6 +216,20 @@ async function run() {
       res.send({
         clientSecret: paymentIntent.client_secret,
       });
+    });
+
+    /**user Review posh API code start **/
+    app.post("/review", async (req, res) => {
+      const review = req.body;
+      const doc = review;
+      const result = await reviewCollection.insertOne(doc);
+      res.send(result);
+    });
+
+    /**user Review get API code start **/
+    app.get("/review", async (req, res) => {
+      const review = await reviewCollection.find({}).toArray();
+      res.send(review);
     });
   } finally {
   }
