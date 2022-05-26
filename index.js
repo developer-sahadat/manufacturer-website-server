@@ -47,6 +47,7 @@ async function run() {
     const reviewCollection = client
       .db("construction_tools")
       .collection("review");
+    const offerCollection = client.db("construction_tools").collection("offer");
 
     /**User  put update api code start**/
     app.put("/user/:email", async (req, res) => {
@@ -230,6 +231,11 @@ async function run() {
     app.get("/review", async (req, res) => {
       const review = await reviewCollection.find({}).toArray();
       res.send(review);
+    });
+    /**user Offer get API code start **/
+    app.get("/offer", async (req, res) => {
+      const offer = await offerCollection.find({}).toArray();
+      res.send(offer);
     });
   } finally {
   }
