@@ -204,6 +204,18 @@ async function run() {
       const review = await orderCollection.find({}).toArray();
       res.send(review);
     });
+    /**My order  all get  api code start**/
+    app.put("/order/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const shipped = req.body;
+      const updateDoc = {
+        $set: shipped,
+      };
+      const result = await orderCollection.updateOne(filter, updateDoc);
+
+      res.send(result);
+    });
 
     /**Create a PaymentIntent with the order amount API**/
     app.post("/create-payment-intent", async (req, res) => {
