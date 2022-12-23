@@ -199,7 +199,6 @@ async function run() {
       res.send(result);
     });
 
-    /**My order  all get  api code start**/
     app.get("/order", verifyJWT, async (req, res) => {
       const review = await orderCollection.find({}).toArray();
       res.send(review);
